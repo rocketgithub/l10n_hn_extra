@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="l10n_hn_extra_view_move_form" model="ir.ui.view">
+            <field name="name">l10n_hb_extra.account.move.form</field>
+            <field name="model">account.move</field>
+            <field name="inherit_id" ref="account.view_move_form"/>
+            <field name="arch" type="xml">
+				<notebook position="inside">
+					<page string="Honduras">
+                        <group>
+                            <group>
+								<field name="cai"/>
+								<field name="compra_con_oce" attrs="{'required': [('company_id', '==', 2)]}"/>
+								<field name="numero_resolucion"/>
+								<field name="fecha_resolucion"/>
+                            </group>
+                            <group>
+								<field name="numero_dua"/>
+								<field name="numero_liquidacion"/>
+								<field name="numero_resolucion_exoneracion"/>
+								<field name="fecha_vencimiento_resolucion"/>
+                            </group>
+                        </group>
+					</page>
+				</notebook>
+            </field>
+        </record>
+
+    </data>
+</odoo>

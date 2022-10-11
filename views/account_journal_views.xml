@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="l10n_hn_view_account_journal_form" model="ir.ui.view">
+            <field name="name">l10n_hn_extra.view_account_journal_form</field>
+            <field name="model">account.journal</field>
+            <field name="type">form</field>
+            <field name="inherit_id" ref="account.view_account_journal_form"/>
+            <field name="arch" type="xml">
+                <notebook position="inside">
+                    <page string="Honduras">
+                        <group>
+                            <group>
+								<field name="tipo_documento" attrs="{'required': [('company_id', '==', 2)]}"/>
+                            </group>
+                        </group>
+                    </page>
+                </notebook>
+            </field>
+        </record>
+
+    </data>
+</odoo>
