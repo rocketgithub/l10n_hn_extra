@@ -115,6 +115,7 @@ class AsistenteReporteCompras(models.TransientModel):
                 'pequeño': 0,
                 'pequeño_exento': 0,
                 'base': 0,
+                'importe_gravado': 0,
                 'iva': 0,
                 'total': 0
             }
@@ -143,27 +144,30 @@ class AsistenteReporteCompras(models.TransientModel):
                     totales[tipo_linea]['neto'] += r['total_excluded']
                     for i in r['taxes']:
                         if i['id'] == self.impuesto_id.id:
+                            linea['importe_gravado'] += r['total_excluded']
                             linea['iva'] += i['amount']
                             totales[tipo_linea]['iva'] += i['amount']
                             totales[tipo_linea]['total'] += i['amount']
-                        elif i['amount'] > 0:
-                            linea[tipo_linea+'_exento'] += i['amount']
-                            totales[tipo_linea]['exento'] += i['amount']
+#                        elif i['amount'] > 0:
+#                            linea[tipo_linea+'_exento'] += i['amount']
+#                            totales[tipo_linea]['exento'] += i['amount']
                 else:
                     linea[tipo_linea+'_exento'] += r['total_excluded']
                     totales[tipo_linea]['exento'] += r['total_excluded']
 
                 linea['total'] += precio * l.quantity
 
-            for llave in linea:
-                if not linea[llave] and llave != 'compra_exento':
-                 linea[llave] = ''
-
             lineas.append(linea)
             
         lineas = sorted(lineas, key = lambda i: str(i['fecha']) + str(i['numero']))
 
         return { 'lineas': lineas, 'totales': totales }
+
+    def formato(self, valor):
+        if valor:
+            return valor
+        else:
+            return ''
 
     def detalle_compras(self, datos):
         f = io.BytesIO()
@@ -222,19 +226,19 @@ class AsistenteReporteCompras(models.TransientModel):
 
         for linea in datos['lineas']:
             y += 1
-            hoja.write(y, 0, linea['rtn_proveedor'], formato_lineas_left)
-            hoja.write(y, 1, linea['proveedor'], formato_lineas_left)
-            hoja.write(y, 2, linea['fecha'], formato_fecha)
-            hoja.write(y, 3, linea['cai'], formato_lineas_left)
-            hoja.write(y, 4, linea['establecimiento'], formato_lineas_left)
-            hoja.write(y, 5, linea['punto_emision'], formato_lineas_left)
-            hoja.write(y, 6, linea['tipo_documento'], formato_lineas_left)
-            hoja.write(y, 7, linea['correlativo'], formato_lineas_left)
-            hoja.write(y, 8, linea['compra_con_oce'], formato_lineas_center)
-            hoja.write(y, 9, linea['numero_resolucion'], formato_lineas_left)
-            hoja.write(y, 10, linea['fecha_resolucion'], formato_fecha)
-            hoja.write(y, 11, linea['compra_exento'], formato_lineas_right)
-            hoja.write(y, 12, linea['base'], formato_lineas_right)
+            hoja.write(y, 0, self.formato(linea['rtn_proveedor']), formato_lineas_left)
+            hoja.write(y, 1, self.formato(linea['proveedor']), formato_lineas_left)
+            hoja.write(y, 2, self.formato(linea['fecha']), formato_fecha)
+            hoja.write(y, 3, self.formato(linea['cai']), formato_lineas_left)
+            hoja.write(y, 4, self.formato(linea['establecimiento']), formato_lineas_left)
+            hoja.write(y, 5, self.formato(linea['punto_emision']), formato_lineas_left)
+            hoja.write(y, 6, self.formato(linea['tipo_documento']), formato_lineas_left)
+            hoja.write(y, 7, self.formato(linea['correlativo']), formato_lineas_left)
+            hoja.write(y, 8, self.formato(linea['compra_con_oce']), formato_lineas_center)
+            hoja.write(y, 9, self.formato(linea['numero_resolucion']), formato_lineas_left)
+            hoja.write(y, 10, self.formato(linea['fecha_resolucion']), formato_fecha)
+            hoja.write(y, 11, linea['compra_exento'] + linea['servicio_exento'] + linea['combustible_exento'] + linea['importacion_exento'] + linea['pequeño_exento'], formato_lineas_right)
+            hoja.write(y, 12, linea['importe_gravado'], formato_lineas_right)
             hoja.write(y, 13, '', formato_lineas_left)
             hoja.write(y, 14, linea['iva'], formato_lineas_right)
             hoja.write(y, 15, '', formato_lineas_left)
@@ -292,16 +296,16 @@ class AsistenteReporteCompras(models.TransientModel):
 
         for linea in datos['lineas']:
             y += 1
-            hoja.write(y, 0, linea['tipo_documento_diario'], formato_lineas_center)
-            hoja.write(y, 1, linea['fecha'], formato_fecha)
-            hoja.write(y, 2, linea['rtn_proveedor'], formato_lineas_left)
-            hoja.write(y, 3, linea['proveedor'], formato_lineas_left)
-            hoja.write(y, 4, linea['numero'], formato_lineas_left)
-            hoja.write(y, 5, linea['compra_con_oce'], formato_lineas_center)
-            hoja.write(y, 6, linea['numero_resolucion'], formato_lineas_left)
-            hoja.write(y, 7, linea['fecha_resolucion'], formato_fecha)
-            hoja.write(y, 8, linea['compra_exento'], formato_lineas_right)
-            hoja.write(y, 9, linea['base'], formato_lineas_right)
+            hoja.write(y, 0, self.formato(linea['tipo_documento_diario']), formato_lineas_center)
+            hoja.write(y, 1, self.formato(linea['fecha']), formato_fecha)
+            hoja.write(y, 2, self.formato(linea['rtn_proveedor']), formato_lineas_left)
+            hoja.write(y, 3, self.formato(linea['proveedor']), formato_lineas_left)
+            hoja.write(y, 4, self.formato(linea['numero']), formato_lineas_left)
+            hoja.write(y, 5, self.formato(linea['compra_con_oce']), formato_lineas_center)
+            hoja.write(y, 6, self.formato(linea['numero_resolucion']), formato_lineas_left)
+            hoja.write(y, 7, self.formato(linea['fecha_resolucion']), formato_fecha)
+            hoja.write(y, 8, linea['compra_exento'] + linea['servicio_exento'] + linea['combustible_exento'] + linea['importacion_exento'] + linea['pequeño_exento'], formato_lineas_right)
+            hoja.write(y, 9, linea['importe_gravado'], formato_lineas_right)
             hoja.write(y, 10, '', formato_lineas_right)
             hoja.write(y, 11, linea['iva'], formato_lineas_right)
             hoja.write(y, 12, '', formato_lineas_right)
@@ -341,12 +345,12 @@ class AsistenteReporteCompras(models.TransientModel):
 
         for linea in datos['lineas']:
             y += 1
-            hoja.write(y, 0, linea['rtn_proveedor'], formato_lineas_left)
-            hoja.write(y, 1, linea['proveedor'], formato_lineas_left)
-            hoja.write(y, 2, linea['numero_dua'], formato_lineas_left)
-            hoja.write(y, 3, linea['numero_liquidacion'], formato_lineas_left)
-            hoja.write(y, 4, linea['numero_resolucion_exoneracion'], formato_lineas_left)
-            hoja.write(y, 5, linea['fecha_vencimiento_resolucion'], formato_fecha)
+            hoja.write(y, 0, self.formato(linea['rtn_proveedor']), formato_lineas_left)
+            hoja.write(y, 1, self.formato(linea['proveedor']), formato_lineas_left)
+            hoja.write(y, 2, self.formato(linea['numero_dua']), formato_lineas_left)
+            hoja.write(y, 3, self.formato(linea['numero_liquidacion']), formato_lineas_left)
+            hoja.write(y, 4, self.formato(linea['numero_resolucion_exoneracion']), formato_lineas_left)
+            hoja.write(y, 5, self.formato(linea['fecha_vencimiento_resolucion']), formato_fecha)
 
         libro.close()
         datos = base64.b64encode(f.getvalue())
